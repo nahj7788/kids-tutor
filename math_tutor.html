@@ -222,17 +222,58 @@ textarea:focus { border-color:#FFB347; }
   border:1.5px solid rgba(255,200,80,.3); word-break:keep-all;
 }
 
-/* 정답 토글 */
-.quiz-wrap { margin:12px 0 4px; }
-.ans-btn {
-  display:inline-block; padding:10px 20px;
-  background:linear-gradient(135deg,var(--mint),var(--blue));
-  color:#2A6A5A; border-radius:20px;
-  font-size:14px; font-weight:800; cursor:pointer;
-  border:none; font-family:'Nunito',sans-serif; transition:all .2s;
-  min-height:44px;
+/* 퀴즈 영역 */
+.quiz-wrap { margin:16px 0 4px; }
+.quiz-question {
+  background:linear-gradient(135deg,rgba(255,217,102,.15),rgba(255,200,130,.1));
+  border:2px solid rgba(255,180,60,.3); border-radius:14px;
+  padding:14px 16px; font-size:14px; font-weight:700;
+  color:var(--text); line-height:1.8; margin-bottom:12px;
 }
-.ans-btn:active { transform:scale(.97); }
+.quiz-choices { display:flex; flex-direction:column; gap:8px; margin-bottom:10px; }
+.choice-btn {
+  width:100%; padding:13px 16px; border:2.5px solid #E8DFF5;
+  border-radius:13px; background:white;
+  font-family:'Nunito',sans-serif; font-size:14px; font-weight:700;
+  color:var(--text); cursor:pointer; text-align:left;
+  transition:all .2s; display:flex; align-items:center; gap:10px;
+  min-height:48px;
+}
+.choice-btn:active { transform:scale(.98); }
+.choice-btn:hover:not(.answered) { border-color:#FFB347; background:#FFFAF0; transform:translateX(4px); }
+.choice-btn.correct {
+  border-color:#4CAF50; background:linear-gradient(135deg,#E8F5E9,#C8F5CC);
+  color:#1B5E20;
+}
+.choice-btn.wrong {
+  border-color:#F44336; background:linear-gradient(135deg,#FFEBEE,#FFC8CC);
+  color:#B71C1C;
+}
+.choice-btn.reveal-correct {
+  border-color:#4CAF50; background:linear-gradient(135deg,#E8F5E9,#C8F5CC);
+  color:#1B5E20;
+}
+.choice-badge {
+  display:inline-flex; align-items:center; justify-content:center;
+  width:26px; height:26px; border-radius:50%;
+  background:linear-gradient(135deg,#FFD166,#FF9A3C);
+  color:white; font-size:12px; font-weight:900; flex-shrink:0;
+}
+.choice-btn.correct .choice-badge { background:linear-gradient(135deg,#66BB6A,#43A047); }
+.choice-btn.wrong .choice-badge { background:linear-gradient(135deg,#EF5350,#E53935); }
+.choice-btn.reveal-correct .choice-badge { background:linear-gradient(135deg,#66BB6A,#43A047); }
+.quiz-result-msg {
+  display:none; padding:13px 16px; border-radius:13px;
+  font-size:14px; font-weight:800; text-align:center; margin-bottom:8px;
+}
+.quiz-result-msg.correct-msg {
+  background:linear-gradient(135deg,#E8F5E9,#C8F5CC);
+  color:#1B5E20; border:2px solid #A5D6A7;
+}
+.quiz-result-msg.wrong-msg {
+  background:linear-gradient(135deg,#FFF3E0,#FFE0B2);
+  color:#E65100; border:2px solid #FFCC80;
+}
 .ans-box {
   display:none; margin-top:9px; padding:14px 16px;
   background:linear-gradient(135deg,#FFF1A8,#FFE4B5);
@@ -462,6 +503,12 @@ async function analyze() {
     '당신은 ' + level + ' 학생을 가르치는 친절하고 재미있는 수학 선생님입니다.\n' +
     '아래 수학 문제를 풀어서 반드시 한국어로만 설명해 주세요.\n' +
     '절대 금지: 한자, 일본어, 중국어 등 한글이 아닌 문자 사용 금지!\n\n' +
+    '수식 표기 절대 규칙 (매우 중요!):\n' +
+    '- $, $$, \\\\frac, \\\\times, \\\\div, \\\\begin, \\\\end, LaTeX 관련 기호 절대 사용 금지!\n' +
+    '- 분수는 반드시 "210/420" 또는 "2 나누기 3" 형태로만 쓰세요\n' +
+    '- 제곱은 x² 또는 "x의 2제곱"으로 쓰세요\n' +
+    '- 곱셈은 × 또는 * 로 쓰세요\n' +
+    '- 수식은 반드시 일반 텍스트로만 표현하세요. 예) 2x + 7 = 15\n\n' +
     '다음 순서로 설명해 주세요:\n\n' +
     '1️⃣ 문제 파악\n' +
     '이 문제가 무엇을 구하는 문제인지 ' + level + ' 눈높이에서 쉽게 설명해 주세요.\n\n' +
@@ -474,16 +521,18 @@ async function analyze() {
     '4️⃣ 핵심 개념 정리\n' +
     '이 문제를 풀 때 꼭 알아야 할 개념이나 공식을 한 가지만 쉽게 설명해 주세요.\n\n' +
     '5️⃣ 확인 퀴즈 🎯\n' +
-    '비슷한 유형의 쉬운 연습 문제를 1개 내주세요.\n' +
-    '문제 바로 아래에 반드시 이 형식으로 정답을 써주세요:\n' +
-    '▼정답: (풀이 과정과 답)\n\n' +
-    '이모지를 풍부하게 써서 밝고 재미있게 설명해 주세요! ⭐\n' +
-    '수식 표기 절대 규칙:\n' +
-    '- $, $$, \\frac, \\times, \\div 같은 LaTeX 기호는 절대 사용 금지!\n' +
-    '- 분수는 (2x/2) 또는 "2x 나누기 2" 형태로 쓰세요\n' +
-    '- 제곱은 x² 또는 "x의 2승" 으로 쓰세요\n' +
-    '- 곱셈은 × 또는 * 로 쓰세요\n' +
-    '- 수식은 일반 텍스트로 읽기 쉽게 표현하세요. 예) 2x + 7 = 15';
+    '비슷한 유형의 4지선다 문제 1개를 만들어 주세요.\n' +
+    '반드시 아래 형식을 정확히 지켜주세요 (JSON 블록 없이 그냥 이 태그만 사용):\n' +
+    '▼QUIZ_START\n' +
+    '문제: (문제 내용)\n' +
+    '①: (보기1)\n' +
+    '②: (보기2)\n' +
+    '③: (보기3)\n' +
+    '④: (보기4)\n' +
+    '정답번호: (①②③④ 중 하나)\n' +
+    '해설: (왜 정답인지 간단히)\n' +
+    '▼QUIZ_END\n\n' +
+    '이모지를 풍부하게 써서 밝고 재미있게 설명해 주세요! ⭐';
 
   try {
     var messages;
@@ -531,39 +580,144 @@ async function analyze() {
   }
 }
 
-// 결과 표시
-function showResult(text) {
-  var esc = text
-    .replace(/&/g,'&amp;')
-    .replace(/</g,'&lt;')
-    .replace(/>/g,'&gt;');
-
-  var parts = esc.split(/(▼정답:[^\n]*(?:\n[^\n]+)*)/);
-  var html = '';
-  for (var i=0; i<parts.length; i++) {
-    if (parts[i].indexOf('▼정답:')===0) {
-      var answerText = parts[i].replace('▼정답:','✅ 정답:');
-      html += '<div class="quiz-wrap">' +
-        '<button class="ans-btn" onclick="toggleAns(this)">🔍 정답 보기 (눌러보세요!)</button>' +
-        '<div class="ans-box">'+answerText+'</div>' +
-        '</div>';
-    } else {
-      html += parts[i];
-    }
-  }
-
-  document.getElementById('resBody').innerHTML = html.replace(/\n/g,'<br>');
-  document.getElementById('lvChip').textContent = level;
-  document.getElementById('result').style.display = 'block';
-  setTimeout(function(){
-    document.getElementById('result').scrollIntoView({ behavior:'smooth', block:'start' });
-  }, 100);
+// LaTeX 제거 함수
+function cleanLatex(text) {
+  return text
+    // \begin{aligned}...\end{aligned} 블록 처리
+    .replace(/\$\$[\s\S]*?\$\$/g, function(m) {
+      return m
+        .replace(/\\\\/g, '\n')
+        .replace(/\\begin\{[^}]+\}/g, '')
+        .replace(/\\end\{[^}]+\}/g, '')
+        .replace(/&=/g, '=')
+        .replace(/&/g, '')
+        .replace(/\\frac\{([^}]+)\}\{([^}]+)\}/g, '($1)/($2)')
+        .replace(/\\times/g, '×')
+        .replace(/\\div/g, '÷')
+        .replace(/\\cdot/g, '·')
+        .replace(/\\[a-zA-Z]+/g, '')
+        .replace(/[${}\\]/g, '')
+        .trim();
+    })
+    // 인라인 $...$
+    .replace(/\$([^$]+)\$/g, function(m, inner) {
+      return inner
+        .replace(/\\frac\{([^}]+)\}\{([^}]+)\}/g, '($1)/($2)')
+        .replace(/\\times/g, '×')
+        .replace(/\\div/g, '÷')
+        .replace(/\\cdot/g, '·')
+        .replace(/\\[a-zA-Z]+/g, '')
+        .replace(/[{}\\]/g, '');
+    })
+    // 나머지 잔여 LaTeX
+    .replace(/\\frac\{([^}]+)\}\{([^}]+)\}/g, '($1)/($2)')
+    .replace(/\\times/g, '×')
+    .replace(/\\div/g, '÷')
+    .replace(/\\begin\{[^}]+\}/g, '')
+    .replace(/\\end\{[^}]+\}/g, '')
+    .replace(/\\\\/g, '\n')
+    .replace(/\\[a-zA-Z]+/g, '')
+    .replace(/[${}]/g, '');
 }
 
-// 정답 토글
+// 결과 표시
+function showResult(rawText) {
+  var text = cleanLatex(rawText);
+
+  // QUIZ 블록 파싱
+  var quizHtml = '';
+  var mainText = text;
+
+  var quizMatch = text.match(/▼QUIZ_START([\s\S]*?)▼QUIZ_END/);
+  if (quizMatch) {
+    var qBlock = quizMatch[1];
+    var qText = (qBlock.match(/문제:\s*(.+)/) || [])[1] || '';
+    var c1 = (qBlock.match(/①:\s*(.+)/) || [])[1] || '';
+    var c2 = (qBlock.match(/②:\s*(.+)/) || [])[1] || '';
+    var c3 = (qBlock.match(/③:\s*(.+)/) || [])[1] || '';
+    var c4 = (qBlock.match(/④:\s*(.+)/) || [])[1] || '';
+    var ans = (qBlock.match(/정답번호:\s*([①②③④])/) || [])[1] || '';
+    var exp = (qBlock.match(/해설:\s*(.+)/) || [])[1] || '';
+    var ansIdx = ['①','②','③','④'].indexOf(ans);
+
+    quizHtml = '<div class="quiz-wrap">' +
+      '<div class="quiz-question">🎯 확인 퀴즈!<br>' + escHtml(qText.trim()) + '</div>' +
+      '<div class="quiz-choices" id="qChoices">';
+    ['①','②','③','④'].forEach(function(num, i) {
+      var label = [c1,c2,c3,c4][i];
+      quizHtml += '<button class="choice-btn" onclick="pickChoice(this,' + i + ',' + ansIdx + ',\'' + escAttr(exp) + '\')">' +
+        '<span class="choice-badge">' + num + '</span>' + escHtml(label.trim()) +
+        '</button>';
+    });
+    quizHtml += '</div>' +
+      '<div class="quiz-result-msg" id="qResultMsg"></div>' +
+      '<div class="ans-box" id="qAnsBox"></div>' +
+      '</div>';
+
+    mainText = text.replace(/▼QUIZ_START[\s\S]*?▼QUIZ_END/, '');
+  } else {
+    // fallback: 기존 ▼정답: 방식
+    var parts = escHtml(mainText).split(/(▼정답:[^\n]*(?:\n[^\n]+)*)/);
+    var fb = '';
+    parts.forEach(function(p) {
+      if (p.indexOf('▼정답:') === 0) {
+        var at = p.replace('▼정답:', '✅ 정답:');
+        fb += '<div class="quiz-wrap">' +
+          '<button class="ans-btn" onclick="toggleAns(this)">🔍 정답 보기 (눌러보세요!)</button>' +
+          '<div class="ans-box">' + at + '</div></div>';
+      } else { fb += p; }
+    });
+    document.getElementById('resBody').innerHTML = fb.replace(/\n/g,'<br>');
+    document.getElementById('lvChip').textContent = level;
+    document.getElementById('result').style.display = 'block';
+    setTimeout(function(){ document.getElementById('result').scrollIntoView({behavior:'smooth',block:'start'}); }, 100);
+    return;
+  }
+
+  var esc = escHtml(mainText);
+  document.getElementById('resBody').innerHTML = esc.replace(/\n/g,'<br>') + quizHtml;
+  document.getElementById('lvChip').textContent = level;
+  document.getElementById('result').style.display = 'block';
+  setTimeout(function(){ document.getElementById('result').scrollIntoView({behavior:'smooth',block:'start'}); }, 100);
+}
+
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+function escAttr(s) {
+  return s.replace(/'/g,'&#39;').replace(/"/g,'&quot;').replace(/\n/g,' ');
+}
+
+// 퀴즈 선택
+function pickChoice(btn, idx, ansIdx, exp) {
+  var wrap = btn.closest('.quiz-wrap');
+  var btns = wrap.querySelectorAll('.choice-btn');
+  var msg  = wrap.querySelector('.quiz-result-msg');
+  var box  = wrap.querySelector('.ans-box');
+
+  // 이미 답했으면 무시
+  if (btn.classList.contains('answered')) return;
+  btns.forEach(function(b){ b.classList.add('answered'); });
+
+  if (idx === ansIdx) {
+    btn.classList.add('correct');
+    msg.className = 'quiz-result-msg correct-msg';
+    msg.innerHTML = '🎉 정답이에요! 훌륭해요!';
+  } else {
+    btn.classList.add('wrong');
+    btns[ansIdx].classList.add('reveal-correct');
+    msg.className = 'quiz-result-msg wrong-msg';
+    msg.innerHTML = '😅 아쉽지만 틀렸어요! 정답이 표시됐어요.';
+  }
+  msg.style.display = 'block';
+  box.innerHTML = '💡 해설: ' + exp;
+  box.style.display = 'block';
+}
+
+// 정답 토글 (fallback)
 function toggleAns(btn) {
   var box  = btn.nextElementSibling;
-  var open = box.style.display==='block';
+  var open = box.style.display === 'block';
   box.style.display = open ? 'none' : 'block';
   btn.textContent   = open ? '🔍 정답 보기 (눌러보세요!)' : '🙈 정답 숨기기';
   btn.style.background = open
