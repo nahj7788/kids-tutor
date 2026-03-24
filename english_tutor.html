@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="영어선생님">
+<title>🦉 아빠표 AI 영어 선생님</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Gaegu:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --pink:   #FFB3C6;
+  --yellow: #FFF1A8;
+  --mint:   #B5EAD7;
+  --blue:   #C7E9FB;
+  --purple: #D4B8F0;
+  --text:   #4A3F6B;
+  --sub:    #8A7FAA;
+  --radius: 22px;
+  --shadow: 0 8px 30px rgba(180,160,220,0.18);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+body {
+  font-family: 'Nunito', sans-serif;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #FFE4F0 0%, #E8F4FF 45%, #E4F7EE 100%);
+  color: var(--text);
+  padding-bottom: 60px;
+}
+body::before {
+  content: '';
+  position: fixed; inset: 0; pointer-events: none; z-index: 0;
+  background-image:
+    radial-gradient(circle, #FFB3C6 1.5px, transparent 1.5px),
+    radial-gradient(circle, #B5EAD7 1px, transparent 1px);
+  background-size: 120px 120px, 80px 80px;
+  background-position: 10px 10px, 50px 50px;
+  opacity: 0.3;
+}
+.wrap { position: relative; z-index: 1; max-width: 700px; margin: 0 auto; padding: 0 16px; }
+
+/* 헤더 */
+header { text-align: center; padding: 36px 20px 24px; }
+.badge {
+  display: inline-block;
+  background: linear-gradient(135deg, var(--pink), var(--purple));
+  color: white; font-size: 11px; font-weight: 800;
+  letter-spacing: 2px; text-transform: uppercase;
+  padding: 5px 16px; border-radius: 30px; margin-bottom: 12px;
+}
+h1 { font-family: 'Gaegu', cursive; font-size: clamp(26px,6vw,44px); line-height:1.2; margin-bottom:8px; }
+h1 span { color: #E06FA0; }
+.subtitle { font-size: 14px; color: var(--sub); font-weight: 600; }
+
+/* 카드 */
+.card {
+  background: rgba(255,255,255,0.88);
+  backdrop-filter: blur(12px);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 22px;
+  margin-bottom: 16px;
+  border: 2px solid rgba(255,255,255,0.7);
+}
+.sec-title {
+  font-size: 11px; font-weight: 800; letter-spacing: 1.5px;
+  text-transform: uppercase; color: var(--sub);
+  margin-bottom: 13px; display: flex; align-items: center; gap: 8px;
+}
+.sec-title::after {
+  content:''; flex:1; height:2px;
+  background: linear-gradient(90deg, var(--pink), transparent); border-radius:2px;
+}
+
+/* API 입력 */
+.row { display: flex; gap: 8px; }
+input[type="password"] {
+  flex: 1; padding: 11px 15px;
+  border: 2px solid #E8DFF5; border-radius: 13px;
+  font-family: 'Nunito', sans-serif; font-size: 14px; color: var(--text);
+  background: rgba(255,255,255,.9); outline: none;
+  transition: border-color .2s;
+}
+input[type="password"]:focus { border-color: var(--purple); }
+.btn-sm {
+  padding: 11px 16px; border: none; border-radius: 13px; min-height:48px;
+  background: linear-gradient(135deg, var(--mint), var(--blue));
+  color: #2A6A5A; font-family: 'Nunito', sans-serif;
+  font-size: 13px; font-weight: 800; cursor: pointer; white-space: nowrap;
+  transition: all .2s;
+}
+.btn-sm:hover { transform: translateY(-2px); }
+.help {
+  background: linear-gradient(135deg, rgba(255,241,168,.6), rgba(255,220,185,.5));
+  border: 2px solid rgba(255,200,100,.4); border-radius: 13px;
+  padding: 13px 15px; font-size: 13px; color: #8A6020;
+  font-weight: 600; line-height: 1.7; margin-top: 11px;
+}
+.help strong { display:block; margin-bottom:3px; }
+.help a { color: #C07020; }
+
+/* 레벨 */
+.levels { display: flex; gap: 8px; }
+.lv-btn {
+  flex: 1; padding: 11px 6px; border: 2.5px solid #E0D5F0; border-radius: 15px;
+  background: white; font-family: 'Nunito', sans-serif;
+  font-size: 12px; font-weight: 700; color: var(--sub);
+  cursor: pointer; text-align: center; transition: all .2s;
+}
+.lv-btn .em { display:block; font-size:20px; margin-bottom:3px; }
+.lv-btn:hover { border-color: var(--pink); background: #FFF0F5; }
+.lv-btn.on {
+  border-color: #E06FA0;
+  background: linear-gradient(135deg, #FFE0EC, #F5D0F0);
+  color: #C0447A; transform: translateY(-2px);
+  box-shadow: 0 4px 14px rgba(220,80,140,.18);
+}
+
+/* 탭 */
+.tabs { display: flex; gap: 8px; margin-bottom: 16px; }
+.tab {
+  flex: 1; padding: 10px; border: 2px solid #E0D5F0; border-radius: 12px; min-height:48px;
+  background: white; font-family: 'Nunito', sans-serif;
+  font-size: 13px; font-weight: 700; color: var(--sub);
+  cursor: pointer; transition: all .2s;
+}
+.tab.on {
+  background: linear-gradient(135deg, var(--mint), var(--blue));
+  border-color: #7DD8B8; color: #2A7A5A;
+}
+.panel { display: none; }
+.panel.on { display: block; }
+
+/* 드롭존 */
+.dropzone {
+  border: 3px dashed #C8B8E8; border-radius: 16px;
+  padding: 30px 20px; text-align: center; cursor: pointer;
+  background: linear-gradient(135deg, rgba(212,184,240,.1), rgba(183,220,251,.1));
+  transition: all .25s; position: relative;
+}
+.dropzone:hover { border-color: #A080D0; transform: scale(1.01); }
+.dropzone input[type="file"] {
+  position:absolute; inset:0; opacity:0; cursor:pointer; width:100%; height:100%;
+}
+.dz-icon { font-size: 40px; display:block; margin-bottom:7px; }
+.dz-text { font-size: 14px; font-weight: 700; }
+.dz-sub  { font-size: 12px; color: var(--sub); margin-top: 3px; }
+#preview {
+  width:100%; max-height:240px; object-fit:contain;
+  border-radius:13px; margin-top:11px; display:none;
+  box-shadow:0 6px 18px rgba(0,0,0,.1);
+}
+
+/* 텍스트 */
+textarea {
+  width:100%; padding:13px 15px;
+  border: 2px solid #E8DFF5; border-radius: 15px;
+  font-family:'Nunito',sans-serif; font-size:14px; color:var(--text);
+  resize:vertical; min-height:100px; outline:none;
+  background:rgba(255,255,255,.9); transition: border-color .2s; line-height:1.6;
+}
+textarea:focus { border-color: var(--purple); }
+
+/* 메인 버튼 */
+.btn-main {
+  width:100%; padding:15px; border:none; border-radius:17px; min-height:54px;
+  background: linear-gradient(135deg, #FF85A8, #C47FE0);
+  color:white; font-family:'Nunito',sans-serif;
+  font-size:16px; font-weight:900; cursor:pointer;
+  box-shadow:0 6px 20px rgba(220,100,160,.35); transition:all .2s;
+}
+.btn-main:hover:not(:disabled) { transform:translateY(-3px); box-shadow:0 10px 28px rgba(220,100,160,.45); }
+.btn-main:active:not(:disabled) { transform:scale(.98); }
+.btn-main:disabled { opacity:.6; cursor:not-allowed; }
+
+/* 로딩 */
+#loading { display:none; text-align:center; padding:26px; }
+.dots { display:inline-flex; gap:8px; }
+.dot {
+  width:11px; height:11px;
+  background:linear-gradient(135deg,var(--pink),var(--purple));
+  border-radius:50%; animation:bounce .8s infinite ease-in-out;
+}
+.dot:nth-child(2){animation-delay:.15s}
+.dot:nth-child(3){animation-delay:.3s}
+@keyframes bounce{0%,80%,100%{transform:scale(1)}40%{transform:scale(1.5)}}
+.load-txt { margin-top:11px; font-size:13px; color:var(--sub); font-weight:700; }
+
+/* 결과 */
+#result { display:none; border-left:5px solid var(--mint); }
+.res-head { display:flex; align-items:center; gap:10px; margin-bottom:14px; }
+.avatar {
+  width:44px; height:44px; border-radius:50%; flex-shrink:0;
+  background:linear-gradient(135deg,var(--pink),var(--purple));
+  display:flex; align-items:center; justify-content:center; font-size:21px;
+}
+.res-head .info strong { font-size:14px; display:block; }
+.res-head .info span  { font-size:12px; color:var(--sub); }
+.res-body {
+  background:linear-gradient(135deg,rgba(255,255,255,.8),rgba(240,235,255,.5));
+  border-radius:13px; padding:17px;
+  font-size:14px; line-height:2; color:var(--text);
+  border:1.5px solid rgba(200,180,240,.3); word-break:keep-all;
+}
+
+/* 정답 토글 */
+.quiz-wrap { margin: 12px 0 4px; }
+.ans-btn {
+  display:inline-block; padding:8px 18px;
+  background:linear-gradient(135deg,var(--mint),var(--blue));
+  color:#2A6A5A; border-radius:20px;
+  font-size:13px; font-weight:800; cursor:pointer;
+  border:none; font-family:'Nunito',sans-serif; transition:all .2s;
+}
+.ans-btn:hover { transform:translateY(-2px); }
+.ans-box {
+  display:none; margin-top:9px; padding:13px 16px;
+  background:linear-gradient(135deg,#FFF1A8,#FFE4B5);
+  border-radius:13px; border-left:4px solid #FFB347;
+  font-weight:700; color:#8A5A00; font-size:14px; line-height:1.8;
+}
+.camera-btn {
+  width:100%; margin-top:10px; padding:14px;
+  border:none; border-radius:14px;
+  background:linear-gradient(135deg,var(--pink),var(--purple));
+  color:white; font-family:'Nunito',sans-serif;
+  font-size:14px; font-weight:900; cursor:pointer;
+  box-shadow:0 4px 14px rgba(200,100,200,.3); transition:all .2s;
+  display:flex; align-items:center; justify-content:center; gap:8px;
+  min-height:50px;
+}
+.camera-btn:active { transform:scale(.97); }
+.btn-reset {
+  margin-top:13px; padding:9px 20px; border:none; border-radius:12px;
+  background:linear-gradient(135deg,#FFE0EC,#F0D5FF);
+  color:#9040B0; font-family:'Nunito',sans-serif;
+  font-size:13px; font-weight:800; cursor:pointer; transition:all .2s;
+}
+.btn-reset:hover { transform:translateY(-2px); }
+
+@media(max-width:480px){ .card{padding:16px;} .lv-btn{font-size:11px;} }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="badge">🌟 아빠가 직접 만든 앱</div>
+    <h1>🦉 AI <span>영어 선생님</span></h1>
+    <p class="subtitle">사진 찍거나 문장 입력하면 선생님이 도와줄게요! ✨</p>
+  </header>
+
+  <!-- API 키 -->
+  <div class="card" style="border-left:5px solid var(--purple)">
+    <div class="sec-title">🔑 선생님 연결하기</div>
+    <div class="row">
+      <input type="password" id="apiKey" placeholder="Groq API 키 (gsk_...)">
+      <button class="btn-sm" onclick="saveKey()">✅ 저장</button>
+    </div>
+    <div class="help">
+      <strong>📌 Groq API 키 발급 (완전 무료!)</strong>
+      1. <a href="https://console.groq.com/keys" target="_blank">console.groq.com/keys</a> 접속<br>
+      2. 구글 계정 로그인 → "Create API Key" 클릭<br>
+      3. 키 복사 후 위에 붙여넣기!
+    </div>
+  </div>
+
+  <!-- 레벨 -->
+  <div class="card">
+    <div class="sec-title">🎓 레벨 선택</div>
+    <div class="levels">
+      <button class="lv-btn" data-lv="초등학교 4~6학년" onclick="setLevel(this)">
+        <span class="em">🐣</span>초등<br>4~6학년
+      </button>
+      <button class="lv-btn on" data-lv="중학교 1학년" onclick="setLevel(this)">
+        <span class="em">🐥</span>중학교<br>1학년
+      </button>
+      <button class="lv-btn" data-lv="중학교 2학년" onclick="setLevel(this)">
+        <span class="em">🐦</span>중학교<br>2학년
+      </button>
+      <button class="lv-btn" data-lv="중학교 3학년" onclick="setLevel(this)">
+        <span class="em">🦅</span>중학교<br>3학년
+      </button>
+    </div>
+  </div>
+
+  <!-- 입력 -->
+  <div class="card">
+    <div class="sec-title">📝 영어 문장 입력</div>
+    <div class="tabs">
+      <button class="tab on"  id="tabPhoto" onclick="switchTab('photo')">📷 사진 업로드</button>
+      <button class="tab"     id="tabText"  onclick="switchTab('text')">✏️ 직접 입력</button>
+    </div>
+    <div class="panel on" id="panelPhoto">
+      <div class="dropzone" id="dz">
+        <input type="file" id="fileInput" accept="image/*" capture="environment">
+        <span class="dz-icon">📸</span>
+        <div class="dz-text" id="dzText">여기를 눌러 사진 선택<br>또는 끌어다 놓기</div>
+        <div class="dz-sub">JPG · PNG OK</div>
+      </div>
+      <button class="camera-btn" onclick="openCamera()">📸 카메라로 바로 찍기</button>
+      <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display:none">
+      <img id="preview" alt="미리보기">
+    </div>
+    <div class="panel" id="panelText">
+      <textarea id="textInput" placeholder="영어 문장을 입력하세요 ✍️&#10;예) She goes to school every day."></textarea>
+    </div>
+  </div>
+
+  <!-- 분석 버튼 -->
+  <button class="btn-main" id="analyzeBtn" onclick="analyze()">
+    🔍 선생님께 물어보기!
+  </button>
+
+  <!-- 로딩 -->
+  <div id="loading" class="card" style="margin-top:16px">
+    <div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+    <div class="load-txt" id="loadTxt">선생님이 열심히 분석 중이에요... 🤓</div>
+  </div>
+
+  <!-- 결과 -->
+  <div class="card" id="result" style="margin-top:16px">
+    <div class="res-head">
+      <div class="avatar">🦉</div>
+      <div class="info">
+        <strong>AI 영어 선생님</strong>
+        <span id="lvChip" style="font-size:12px;color:var(--sub)"></span>
+      </div>
+    </div>
+    <div class="res-body" id="resBody"></div>
+    <button class="btn-reset" onclick="resetAll()">🔄 다시 분석하기</button>
+  </div>
+
+</div>
+<script>
+var level   = '중학교 1학년';
+var curTab  = 'photo';
+var imgFile = null;
+var loadTimer;
+var msgs = [
+  '선생님이 열심히 분석 중이에요... 🤓',
+  '단어를 하나씩 살펴보고 있어요... 📖',
+  '퀴즈를 만들고 있어요... ✏️',
+  '거의 다 됐어요! 조금만요... ⭐'
+];
+
+// API 키
+function saveKey() {
+  var k = document.getElementById('apiKey').value.trim();
+  if (!k) { alert('API 키를 입력해 주세요!'); return; }
+  localStorage.setItem('groq_key', k);
+  document.getElementById('apiKey').style.borderColor = '#7DD8B8';
+  toast('✅ API 키가 저장됐어요!');
+}
+window.onload = function() {
+  var k = localStorage.getItem('groq_key');
+  if (k) {
+    document.getElementById('apiKey').value = k;
+    document.getElementById('apiKey').style.borderColor = '#7DD8B8';
+  }
+};
+
+// 레벨
+function setLevel(btn) {
+  document.querySelectorAll('.lv-btn').forEach(function(b){ b.classList.remove('on'); });
+  btn.classList.add('on');
+  level = btn.getAttribute('data-lv');
+}
+
+// 탭
+function switchTab(tab) {
+  curTab = tab;
+  document.getElementById('tabPhoto').classList.toggle('on', tab==='photo');
+  document.getElementById('tabText').classList.toggle('on',  tab==='text');
+  document.getElementById('panelPhoto').classList.toggle('on', tab==='photo');
+  document.getElementById('panelText').classList.toggle('on',  tab==='text');
+}
+
+// 파일
+document.getElementById('fileInput').onchange = function() {
+  if (this.files && this.files[0]) loadImg(this.files[0]);
+};
+document.getElementById('cameraInput').onchange = function() {
+  if (this.files && this.files[0]) loadImg(this.files[0]);
+};
+function openCamera() {
+  document.getElementById('cameraInput').click();
+}
+function loadImg(file) {
+  imgFile = file;
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    var img = document.getElementById('preview');
+    img.src = e.target.result;
+    img.style.display = 'block';
+    document.getElementById('dzText').innerHTML = '✅ ' + file.name;
+  };
+  reader.readAsDataURL(file);
+}
+var dz = document.getElementById('dz');
+dz.ondragover  = function(e){ e.preventDefault(); dz.style.borderColor='#A080D0'; };
+dz.ondragleave = function()  { dz.style.borderColor='#C8B8E8'; };
+dz.ondrop = function(e) {
+  e.preventDefault(); dz.style.borderColor='#C8B8E8';
+  var f = e.dataTransfer.files[0];
+  if (f && f.type.indexOf('image')===0) loadImg(f);
+};
+
+// base64
+function toBase64(file) {
+  return new Promise(function(res, rej) {
+    var r = new FileReader();
+    r.onload  = function(){ res(r.result.split(',')[1]); };
+    r.onerror = rej;
+    r.readAsDataURL(file);
+  });
+}
+
+// 분석
+async function analyze() {
+  var apiKey = localStorage.getItem('groq_key') || document.getElementById('apiKey').value.trim();
+  if (!apiKey) { alert('먼저 Groq API 키를 저장해 주세요! 🔑'); return; }
+
+  var textVal = document.getElementById('textInput').value.trim();
+  if (curTab === 'photo' && !imgFile) { alert('사진을 먼저 업로드해 주세요! 📸'); return; }
+  if (curTab === 'text'  && !textVal) { alert('영어 문장을 입력해 주세요! ✏️'); return; }
+
+  document.getElementById('analyzeBtn').disabled = true;
+  document.getElementById('loading').style.display = 'block';
+  document.getElementById('result').style.display  = 'none';
+
+  var mi = 0;
+  document.getElementById('loadTxt').textContent = msgs[0];
+  loadTimer = setInterval(function(){
+    mi = (mi+1) % msgs.length;
+    document.getElementById('loadTxt').textContent = msgs[mi];
+  }, 2000);
+
+  var prompt = '당신은 ' + level + ' 학생을 가르치는 친절하고 재미있는 영어 선생님입니다.\n' +
+    '아래 영어 문장을 분석해서 반드시 한국어로만 작성해 주세요.\n' +
+    '절대 금지: 한자, 일본어, 중국어 등 한글이 아닌 문자는 단 한 글자도 사용 금지! 한자가 나올 자리엔 반드시 한글로 쓰세요. 예) 每日→매일\n\n' +
+    '1️⃣ 전체 해석\n' +
+    '자연스러운 한국어로만 번역하세요. 한자 절대 금지.\n\n' +
+    '2️⃣ 핵심 단어 3개\n' +
+    '각 단어의 뜻(한국어), 발음(특수기호나 IPA 기호 없이 순수 한글로만. 예: named→네임드, broken→브로큰), 예문과 해석(한국어)을 알려주세요.\n\n' +
+    '3️⃣ 문법 설명\n' +
+    level + ' 수준에서 쉽고 재미있게 한국어로 설명해 주세요.\n\n' +
+    '4️⃣ 퀴즈 타임! 🎯\n' +
+    '4지선다 퀴즈 1문제를 만들어 주세요.\n' +
+    '문제 바로 아래에 이 형식으로 정답을 써주세요:\n' +
+    '▼정답: (번호와 이유)\n\n' +
+    '이모지를 풍부하게 써서 밝고 재미있게 작성해 주세요! ⭐';
+
+  try {
+    var messages;
+    var model;
+
+    if (curTab === 'photo' && imgFile) {
+      var b64  = await toBase64(imgFile);
+      var mime = imgFile.type || 'image/jpeg';
+      model = 'meta-llama/llama-4-scout-17b-16e-instruct';
+      messages = [{
+        role: 'user',
+        content: [
+          { type: 'text', text: prompt },
+          { type: 'image_url', image_url: { url: 'data:' + mime + ';base64,' + b64 } }
+        ]
+      }];
+    } else {
+      model = 'llama-3.3-70b-versatile';
+      messages = [{
+        role: 'user',
+        content: prompt + '\n\n분석할 문장:\n' + textVal
+      }];
+    }
+
+    var res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + apiKey
+      },
+      body: JSON.stringify({ model: model, messages: messages, max_tokens: 2000, temperature: 0.7 })
+    });
+
+    var data = await res.json();
+    if (data.error) throw new Error(data.error.message);
+
+    var text = (data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content)
+      ? data.choices[0].message.content
+      : '응답을 받지 못했어요 😢';
+
+    showResult(text);
+
+  } catch(err) {
+    alert('오류가 발생했어요 😢\n' + err.message);
+  } finally {
+    clearInterval(loadTimer);
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('analyzeBtn').disabled = false;
+  }
+}
+
+// 결과 표시
+function showResult(text) {
+  // HTML 특수문자 처리
+  var esc = text
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;');
+
+  // ▼정답: 부분을 토글 버튼으로 교체
+  var parts = esc.split(/(▼정답:[^\n]*(?:\n[^\n]+)*)/);
+  var html = '';
+  for (var i=0; i<parts.length; i++) {
+    if (parts[i].indexOf('▼정답:') === 0) {
+      var answerText = parts[i].replace('▼정답:', '✅ 정답:');
+      html += '<div class="quiz-wrap">' +
+        '<button class="ans-btn" onclick="toggleAns(this)">🔍 정답 보기 (눌러보세요!)</button>' +
+        '<div class="ans-box">' + answerText + '</div>' +
+        '</div>';
+    } else {
+      html += parts[i];
+    }
+  }
+
+  document.getElementById('resBody').innerHTML = html.replace(/\n/g,'<br>');
+  document.getElementById('lvChip').textContent = level;
+  document.getElementById('result').style.display = 'block';
+  setTimeout(function(){
+    document.getElementById('result').scrollIntoView({ behavior:'smooth', block:'start' });
+  }, 100);
+}
+
+// 정답 토글
+function toggleAns(btn) {
+  var box  = btn.nextElementSibling;
+  var open = box.style.display === 'block';
+  box.style.display = open ? 'none' : 'block';
+  btn.textContent   = open ? '🔍 정답 보기 (눌러보세요!)' : '🙈 정답 숨기기';
+  btn.style.background = open
+    ? 'linear-gradient(135deg,#B5EAD7,#C7E9FB)'
+    : 'linear-gradient(135deg,#FFB3C6,#D4B8F0)';
+}
+
+// 초기화
+function resetAll() {
+  document.getElementById('result').style.display  = 'none';
+  document.getElementById('preview').style.display = 'none';
+  document.getElementById('dzText').innerHTML = '여기를 눌러 사진 선택<br>또는 끌어다 놓기';
+  document.getElementById('fileInput').value  = '';
+  document.getElementById('textInput').value  = '';
+  imgFile = null;
+  window.scrollTo({ top:0, behavior:'smooth' });
+}
+
+// 토스트
+function toast(msg) {
+  var t = document.createElement('div');
+  t.style.cssText = 'position:fixed;bottom:28px;left:50%;transform:translateX(-50%);' +
+    'background:linear-gradient(135deg,#FF85A8,#C47FE0);color:white;' +
+    'padding:10px 22px;border-radius:30px;font-family:Nunito,sans-serif;' +
+    'font-weight:800;font-size:13px;z-index:9999;box-shadow:0 6px 20px rgba(200,100,180,.4);';
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(function(){ t.remove(); }, 2500);
+}
+</script>
+</body>
+</html>
